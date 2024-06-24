@@ -1,7 +1,9 @@
 <?php
-require_once __DIR__ . '/Classes/AddIncome.php';
-require_once __DIR__ . '/Classes/AddExpense.php';
-require_once __DIR__ . '/Classes/ViewIncome.php';
+
+spl_autoload_register(function($className){
+    $dir = "Classes/";
+    require_once $dir.$className.".php";
+});
 
 class Cli_application
 {
@@ -19,10 +21,10 @@ class Cli_application
         ['name' => 'Salary', 'type' => 'Income'],
         ['name' => 'Business', 'type' => 'Income'],
         ['name' => 'Loan', 'type' => 'Income'],
-        ['name' => 'House Rent', 'type' => 'Expnese'],
-        ['name' => 'Utility Bill', 'type' => 'Expnese'],
-        ['name' => 'Yearly Zakat', 'type' => 'Expnese'],
-        ['name' => 'Food Expenses', 'type' => 'Expnese'],
+        ['name' => 'Rent', 'type' => 'Expnese'],
+        ['name' => 'Utility', 'type' => 'Expnese'],
+        ['name' => 'Zakat', 'type' => 'Expnese'],
+        ['name' => 'Fooding', 'type' => 'Expnese'],
     ];
     public $choice = 0;
 
@@ -41,7 +43,23 @@ class Cli_application
 
 
             if ($this->choice == 1) {
-                $type = readline("Enter income category : ");
+                top:
+                $type = trim(readline("Enter income category : "));
+                $status = 0;
+                foreach ($this->categories as $category) {
+                    
+                    if($category['name']==$type && $category['type']=='Income'){
+                        $status = 1;
+                        //echo "Name: " . $category['name'] . ", Type: " . $category['type'] . "\n";
+                        break;
+                    }
+                    
+                    
+                }
+                if($status ==0){
+                goto top;
+                }
+
                 $amount = intval(readline("Enter income amount : "));
                 $in = new AddIncome();
                 $in->addIncome($type, $amount);
@@ -49,7 +67,22 @@ class Cli_application
             
 
            else if ($this->choice == 2) {
-                $type = readline("Enter expense category : ");
+            top1:
+            $type = trim(readline("Enter expense category : "));
+            $status = 0;
+            foreach ($this->categories as $category) {
+                
+                //echo "Name: " . $category['name'] . ", Type: " . $type . "\n";
+
+                if($category['name']==$type && $category['type']=='Expnese'){
+                    $status = 1;
+                    break;
+                }
+                
+            }
+            if($status ==0){
+            goto top1;
+            }
                 $amount = intval(readline("Enter expense amount : "));
                 $ex = new AddExpense();
                 $ex->addExpense($type, $amount);
@@ -63,46 +96,23 @@ class Cli_application
             } 
             
             else if ($this->choice == 4) {
-                $getIncome = file_get_contents('expense.txt');
-                $incomes = explode(',', $getIncome);
-                $totalIncome = 0;
-                foreach ($incomes as $key => $value) {
-                    $ex = explode('=', $value);
-                    if ($value) {
-                        $totalIncome += $ex[1];
-                    }
-                }
-                echo "Total expense is : $totalIncome \n";
-                echo "------------------------- \n";
-            } else if ($this->choice == 5) {
-                $getIncome = file_get_contents('income.txt');
-                $incomes = explode(',', $getIncome);
-                $totalIncome = 0;
-                foreach ($incomes as $key => $value) {
-                    $ex = explode('=', $value);
-                    if ($value) {
-                        $totalIncome += $ex[1];
-                    }
-                }
-                $getExpense = file_get_contents('expense.txt');
-                $expenses = explode(',', $getExpense);
-                $totalExpense = 0;
-                foreach ($expenses as $key => $value) {
-                    $ex = explode('=', $value);
-                    if ($value) {
-                        $totalExpense += $ex[1];
-                    }
-                }
-                $total = $totalIncome - $totalExpense;
-                echo "income : $totalIncome, expense : $totalExpense \n";
-                echo "My savings =   $total \n";
-                echo "------------------------- \n";
-            } else if ($this->choice == 6) {
+                $view = new ViewExpense();
+                $view->viewExpense();
+            }
+            
+            else if ($this->choice == 5) {
+                $view = new ViewSavings();
+                $view->viewSavings();
+            } 
+            
+            else if ($this->choice == 6) {
                 foreach ($this->categories as $category) {
                     echo "Name: " . $category['name'] . ", Type: " . $category['type'] . "\n";
                 }
                 echo "------------------------- \n";
-            } else if ($this->choice == 7) {
+            } 
+            
+            else if ($this->choice == 7) {
                 break;
             }
         }
@@ -111,3 +121,7 @@ class Cli_application
 
 $cli = new Cli_application();
 $cli->run();
+
+
+// 1. condition 
+// 2. autoload
